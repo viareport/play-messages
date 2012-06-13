@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="messages" default="build" basedir=".">
+<project name="play-messages" default="build" basedir=".">
 
-    <property name="play.path" value="c:\code\play-master\play"/>
+    <property environment="env"/>
+    <property name="play.path" value="${env.PLAY_PATH}"/>
+    <import file="${play.path}/resources/inativ-build.xml"/>
+
+    <target name="check" unless="play.path">
+        <fail message="Please specify Play framework path using -Dplay.path=/path/to/framework/home" />
+    </target>
 
     <path id="project.classpath">
         <pathelement path="${play.path}/framework/classes"/>
@@ -12,16 +18,13 @@
         <fileset dir="${play.path}/framework">
             <include name="*.jar"/>
         </fileset>
-        <fileset dir="lib" erroronmissingdir="false">
+        <fileset dir="lib">
             <include name="*.jar"/>
         </fileset>
     </path>
 
-    <target name="clean">
-        <delete dir="tmp"/>
-    </target>
-
     <target name="build" depends="compile">
+        <mkdir dir="lib" />
         <copy todir="tmp/classes">
             <fileset dir="src">
                 <include name="**/*.properties"/>
@@ -30,7 +33,7 @@
                 <include name="**/play.static"/>
             </fileset>
         </copy>
-        <jar destfile="lib/${ant.project.name}.jar" basedir="tmp/classes">
+        <jar destfile="lib/messages.jar" basedir="tmp/classes">
             <manifest>
                 <section name="Play-module">
                     <attribute name="Specification-Title" value="play-messages"/>
@@ -40,33 +43,16 @@
         <delete dir="tmp" />
     </target>
 
-    <target name="compile">
+    <target name="compile" depends="check">
         <mkdir dir="tmp/classes" />
-        <javac srcdir="src" destdir="tmp/classes" target="1.5" debug="true">
+        <javac destdir="tmp/classes" target="1.5" debug="true">
+            <src path="src"/>
+            <src path="app"/>
             <classpath refid="project.classpath" />
         </javac>
     </target>
-
-    <target name="package" depends="clean,build">
-        <input message="What is the module version number?" addproperty="version"/>
-        <input message="What are the playframework versions required?" addproperty="frameworkVersions"/>
-        <echo file="manifest" message="version=${version}${line.separator}frameworkVersions=${frameworkVersions}"/>
-        <zip destfile="dist/${ant.project.name}-${version}.zip">
-            <fileset dir="${basedir}">
-                <include name="app/**"/>
-                <include name="src/**"/>
-                <include name="conf/**"/>
-                <include name="public/**"/>
-                <include name="lib/**"/>
-                <include name="documentation/**"/>
-                <include name="build.xml"/>
-                <include name="manifest"/>
-                <include name="*.py"/>
-                <include name="README*"/>
-                <include name="COPYING"/>
-            </fileset>
-        </zip>
-        <delete file="manifest"/>
-    </target>
+    
+    <target name="unit-test"/>
+    <target name="js-test"/>
 
 </project>
