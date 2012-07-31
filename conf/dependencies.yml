@@ -1,4 +1,4 @@
-self: inativ -> play-messages 0.1.2-2
+self: inativ -> play-messages 1.0.0-1 
 
 require:
     - play 1.2.5-viareport
